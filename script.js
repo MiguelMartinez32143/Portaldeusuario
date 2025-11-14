@@ -135,7 +135,11 @@ document.addEventListener("DOMContentLoaded", () => {
     if (
       inputNombre.value.trim() === "" &&
       inputEmail.value.trim() === "" &&
-      inputEdad.value.trim() === ""
+      inputEdad.value.trim() === "" && 
+      errorNombre.textContent.trim() === "" &&
+      errorEmail.textContent.trim() === "" &&
+      errorEdad.textContent.trim() === ""
+
     ) {
       alert("No hay nada que limpiar");
       return;
