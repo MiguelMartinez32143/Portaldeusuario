@@ -87,8 +87,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Si está oculto → mostrar
     if (listaUsuarios.length === 0) {
-      cardResultado.innerHTML = "<p>No hay usuarios guardados.</p>";
-    } else {
+      alert("No hay usuarios guardados")
+      return
+    } 
+    if  (listaUsuarios.length > 0){
       let html = "<h3>Usuarios guardados:</h3>";
 
       listaUsuarios.forEach((u, i) => {
@@ -123,7 +125,7 @@ document.addEventListener("DOMContentLoaded", () => {
         listaUsuarios.splice(index, 1);
 
         localStorage.setItem("usuarios", JSON.stringify(listaUsuarios));
-        mostrarDatos(); // refrescar vista
+        mostrarDatos();
         alert("🗑️ Usuario eliminado.");
       });
     });
