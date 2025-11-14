@@ -138,6 +138,9 @@ button:active {
 }
 
 /* Resultado */
+.resultado{
+  display: none;
+}
 .resultado p {
   margin: 0.3rem 0;
   font-size: 0.95rem;

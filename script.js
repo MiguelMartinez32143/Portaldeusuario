@@ -17,31 +17,22 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Resultado
   const cardResultado = document.getElementById("card-resultado");
-  const resNombre = document.getElementById("res-nombre");
-  const resEmail = document.getElementById("res-email");
-  const resEdad = document.getElementById("res-edad");
 
-  // ========= VALIDACIONES =========
-  const validarEmail = (email) => {
-    const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return re.test(String(email).toLowerCase());
-  };
+  // VALIDACIONES
+  const validarEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
   const validarFormulario = () => {
     let valido = true;
 
-    // limpiar mensajes
     errorNombre.textContent = "";
     errorEmail.textContent = "";
     errorEdad.textContent = "";
 
-    // nombre
     if (inputNombre.value.trim() === "") {
       errorNombre.textContent = "El nombre es obligatorio.";
       valido = false;
     }
 
-    // email
     const email = inputEmail.value.trim();
     if (email === "") {
       errorEmail.textContent = "El email es obligatorio.";
@@ -51,18 +42,16 @@ document.addEventListener("DOMContentLoaded", () => {
       valido = false;
     }
 
-    // edad
     const edad = parseInt(inputEdad.value.trim(), 10);
-    if (isNaN(edad) || edad <= 0) {
-      errorEdad.textContent = "La edad debe ser un número positivo.";
+    if (isNaN(edad) || edad <= 0 || edad >= 100) {
+      errorEdad.textContent = "La edad debe ser un número coherente.";
       valido = false;
     }
 
     return valido;
   };
 
-  // ========= LÓGICA PRINCIPAL =========
-
+  // GUARDAR DATOS
   const guardarDatos = () => {
     if (!validarFormulario()) {
       alert("❌ Corrige los errores del formulario.");
@@ -75,51 +64,110 @@ document.addEventListener("DOMContentLoaded", () => {
       edad: parseInt(inputEdad.value.trim(), 10),
     };
 
-    localStorage.setItem("usuarioData", JSON.stringify(usuario));
+    let listaUsuarios = JSON.parse(localStorage.getItem("usuarios")) || [];
+    listaUsuarios.push(usuario);
+
+    localStorage.setItem("usuarios", JSON.stringify(listaUsuarios));
+
     alert("✅ Datos guardados en LocalStorage.");
     limpiarFormulario();
     cardResultado.classList.add("hidden");
   };
 
+  // MOSTRAR DATOS
   const mostrarDatos = () => {
-    const data = localStorage.getItem("usuarioData");
+    let listaUsuarios = JSON.parse(localStorage.getItem("usuarios")) || [];
 
-    if (!data) {
-      resNombre.textContent = "No hay datos guardados.";
-      resEmail.textContent = "No hay datos guardados.";
-      resEdad.textContent = "No hay datos guardados.";
-      cardResultado.classList.remove("hidden");
-      alert("No se encontraron datos en LocalStorage.");
+    // Si está visible → ocultar
+    if (!cardResultado.classList.contains("hidden")) {
+      cardResultado.classList.add("hidden");
+      btnVerDatos.textContent = "Ver Datos";
       return;
     }
 
-    const usuario = JSON.parse(data);
-    resNombre.textContent = usuario.nombre ?? "N/A";
-    resEmail.textContent = usuario.email ?? "N/A";
-    resEdad.textContent = usuario.edad ?? "N/A";
+    // Si está oculto → mostrar
+    if (listaUsuarios.length === 0) {
+      cardResultado.innerHTML = "<p>No hay usuarios guardados.</p>";
+    } else {
+      let html = "<h3>Usuarios guardados:</h3>";
 
+      listaUsuarios.forEach((u, i) => {
+        html += `
+          <div class="usuario-item">
+            <p><strong>Usuario #${i + 1}</strong></p>
+            <p>Nombre: ${u.nombre}</p>
+            <p>Email: ${u.email}</p>
+            <p>Edad: ${u.edad}</p>
+
+            <button class="btn-borrar-individual" data-index="${i}">
+              Borrar este usuario
+            </button>
+
+            <hr>
+          </div>
+        `;
+      });
+
+      cardResultado.innerHTML = html;
+    }
+
+    // Mostrar tarjeta de resultados
     cardResultado.classList.remove("hidden");
+    btnVerDatos.textContent = "Ocultar Datos";
+
+    // Activar botones individuales
+    const botonesBorrar = document.querySelectorAll(".btn-borrar-individual");
+    botonesBorrar.forEach((btn) => {
+      btn.addEventListener("click", (e) => {
+        const index = parseInt(e.target.dataset.index);
+        listaUsuarios.splice(index, 1);
+
+        localStorage.setItem("usuarios", JSON.stringify(listaUsuarios));
+        mostrarDatos(); // refrescar vista
+        alert("🗑️ Usuario eliminado.");
+      });
+    });
   };
 
+
+  // LIMPIAR FORMULARIO
   const limpiarFormulario = () => {
+    if (
+      inputNombre.value.trim() === "" &&
+      inputEmail.value.trim() === "" &&
+      inputEdad.value.trim() === ""
+    ) {
+      alert("No hay nada que limpiar");
+      return;
+    }
+
     inputNombre.value = "";
     inputEmail.value = "";
     inputEdad.value = "";
+
     errorNombre.textContent = "";
     errorEmail.textContent = "";
     errorEdad.textContent = "";
   };
 
+  // BORRAR DATOS
   const borrarDatos = () => {
-    localStorage.removeItem("usuarioData");
-    resNombre.textContent = "";
-    resEmail.textContent = "";
-    resEdad.textContent = "";
+    const usuarios = JSON.parse(localStorage.getItem("usuarios"));
+
+    if (!usuarios || usuarios.length === 0) {
+      alert("No hay datos para borrar");
+      return;
+    }
+
+    localStorage.removeItem("usuarios");
+    alert("🗑️ Datos borrados correctamente");
+
+    cardResultado.innerHTML = "";
     cardResultado.classList.add("hidden");
-    alert("🗑️ Datos borrados de LocalStorage.");
+    btnVerDatos.textContent = "Ver Datos";
   };
 
-  // ========= EVENTOS =========
+  // EVENTOS
   btnGuardar.addEventListener("click", guardarDatos);
   btnVerDatos.addEventListener("click", mostrarDatos);
   btnLimpiarFormulario.addEventListener("click", limpiarFormulario);
