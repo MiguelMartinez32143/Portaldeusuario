@@ -58,6 +58,9 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
+    // Detectar si la tarjeta estaba visible antes de guardar
+    const estabaVisible = !cardResultado.classList.contains("hidden");
+
     const usuario = {
       nombre: inputNombre.value.trim(),
       email: inputEmail.value.trim(),
@@ -71,8 +74,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
     alert("✅ Datos guardados en LocalStorage.");
     limpiarFormulario();
-    cardResultado.classList.add("hidden");
+
+    // 🔥 Si la tarjeta estaba visible → volver a mostrar los datos
+    if (estabaVisible) {
+      cardResultado.classList.add("hidden"); // ocultar antes para evitar loop
+      mostrarDatos(); // vuelve a renderizar
+    }
   };
+
+
 
   // MOSTRAR DATOS
   const mostrarDatos = () => {
@@ -137,11 +147,10 @@ document.addEventListener("DOMContentLoaded", () => {
     if (
       inputNombre.value.trim() === "" &&
       inputEmail.value.trim() === "" &&
-      inputEdad.value.trim() === "" && 
+      inputEdad.value.trim() === "" &&
       errorNombre.textContent.trim() === "" &&
       errorEmail.textContent.trim() === "" &&
       errorEdad.textContent.trim() === ""
-
     ) {
       alert("No hay nada que limpiar");
       return;
